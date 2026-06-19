@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  font-family: "Cairo", sans-serif;
+  direction: rtl;
+  @apply bg-gray-50 text-slate-900 dark:bg-[#0f172a] dark:text-white transition-colors duration-500;
+}
