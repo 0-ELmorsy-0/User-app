@@ -11,10 +11,12 @@ CREATE TABLE IF NOT EXISTS exams (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    course_id UUID, -- Removed REFERENCES courses(id) to avoid relation error
-    subject_id UUID, -- Removed REFERENCES course_subjects(id)
+    course_id UUID,
+    subject_id UUID,
+    module_id UUID,
     duration_minutes INTEGER DEFAULT 60,
-    questions JSONB, -- Array of questions
+    total_marks INTEGER DEFAULT 100,
+    is_published BOOLEAN DEFAULT false,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -27,6 +29,10 @@ CREATE TABLE IF NOT EXISTS assignments (
     description TEXT,
     course_id UUID,
     subject_id UUID,
+    module_id UUID,
+    duration_minutes INTEGER DEFAULT 60,
+    total_marks INTEGER DEFAULT 100,
+    is_published BOOLEAN DEFAULT false,
     file_url VARCHAR(255),
     deadline TIMESTAMP WITH TIME ZONE,
     is_active BOOLEAN DEFAULT true,

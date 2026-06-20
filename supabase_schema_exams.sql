@@ -16,15 +16,17 @@ CREATE TABLE exams (
     duration_minutes INTEGER NOT NULL DEFAULT 60,
     total_marks INTEGER NOT NULL DEFAULT 100,
     is_published BOOLEAN DEFAULT false,
+    module_id UUID,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 2. Questions Table
--- Stores individual questions for each exam
+-- Stores individual questions for each exam or assignment
 CREATE TABLE questions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
+    exam_id UUID REFERENCES public.exams(id) ON DELETE CASCADE,
+    assignment_id UUID REFERENCES public.assignments(id) ON DELETE CASCADE,
     question_text TEXT NOT NULL,
     image_url TEXT, -- Optional URL for questions with diagrams
     marks INTEGER DEFAULT 1,

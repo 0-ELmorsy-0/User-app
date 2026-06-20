@@ -1,4 +1,4 @@
-import { User, Phone, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
+import { User, Phone, Lock, Eye, EyeOff, MapPin, Mail } from 'lucide-react';
 import AuthLayout from './AuthLayout';
 import { Page } from '../App';
 import React, { useState, useEffect } from 'react';
@@ -36,6 +36,7 @@ export default function Register({ onNavigate, onAuth }: { onNavigate: (p: Page)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    email: '',
     phone: '',
     parentPhone: '',
     gender: '',
@@ -62,11 +63,9 @@ export default function Register({ onNavigate, onAuth }: { onNavigate: (p: Page)
     setLoading(true);
 
     try {
-      // For supabase phone auth without SMS provider, using email as an alternative
-      // if using real phone auth: await supabase.auth.signUp({ phone: formData.phone, password: formData.password })
-      const fakeEmail = `${formData.phone}@student-app.com`;
+      // Use real email for auth
       const { data, error } = await supabase.auth.signUp({
-        email: fakeEmail,
+        email: formData.email,
         password: formData.password,
       });
 
@@ -79,6 +78,7 @@ export default function Register({ onNavigate, onAuth }: { onNavigate: (p: Page)
             id: data.user.id,
             first_name: formData.firstName,
             last_name: formData.lastName,
+            email: formData.email,
             phone: formData.phone,
             parent_phone: formData.parentPhone,
             gender: formData.gender,
@@ -130,6 +130,10 @@ export default function Register({ onNavigate, onAuth }: { onNavigate: (p: Page)
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative group md:col-span-2">
+            <Mail className="absolute right-0 top-3 w-5 h-5 text-sky-500 group-focus-within:text-sky-400 transition-colors" />
+            <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="البريد الإلكتروني" className="w-full bg-transparent border-b border-gray-300 dark:border-slate-700 py-3 pr-8 pl-4 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-sky-500 dark:focus:border-sky-400 outline-none transition-colors" />
+          </div>
           <div className="relative group">
             <Phone className="absolute right-0 top-3 w-5 h-5 text-sky-500 group-focus-within:text-sky-400 transition-colors" />
             <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required placeholder={t('phoneLabel')} className="w-full bg-transparent border-b border-gray-300 dark:border-slate-700 py-3 pr-8 pl-4 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-sky-500 dark:focus:border-sky-400 outline-none transition-colors" />

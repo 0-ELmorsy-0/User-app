@@ -15,6 +15,7 @@ import AlertBanner from './components/AlertBanner';
 
 import { Toaster } from 'react-hot-toast';
 import SplashScreen from './components/SplashScreen';
+import { supabase } from './lib/supabase';
 
 export type CourseData = {
   id?: string | number;
@@ -29,13 +30,63 @@ export type CourseData = {
 export type Page = 'home' | 'login' | 'register' | 'course-details' | 'my-courses' | 'profile';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    return (localStorage.getItem('app_current_page') as Page) || 'home';
+  });
   const [selectedCourse, setSelectedCourse] = useState<CourseData | null>(null);
   const [isDark, setIsDark] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userSemester, setUserSemester] = useState<string>("Semester 1");
+  const [userSemester, setUserSemester] = useState<string>(() => {
+    return localStorage.getItem('app_user_semester') || 'Semester 1';
+  });
   const [showSplash, setShowSplash] = useState(true);
   const [fadeSplash, setFadeSplash] = useState(false);
+  const [isAppLoading, setIsAppLoading] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem('app_current_page', currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    localStorage.setItem('app_user_semester', userSemester);
+  }, [userSemester]);
+
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (session) {
+        setIsLoggedIn(true);
+        // Fetch user academic year
+        supabase.from('students').select('academic_year').eq('id', session.user.id).single()
+          .then(({ data }) => {
+            if (data?.academic_year) {
+              setUserSemester(data.academic_year);
+            }
+          })
+          .finally(() => setIsAppLoading(false));
+      } else {
+        setIsAppLoading(false);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        setIsLoggedIn(true);
+        const { data } = await supabase.from('students').select('academic_year').eq('id', session.user.id).single();
+        if (data?.academic_year) {
+          setUserSemester(data.academic_year);
+        }
+      } else {
+        setIsLoggedIn(false);
+        // setCurrentPage('home');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
@@ -73,7 +124,8 @@ export default function App() {
     setCurrentPage('home');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsLoggedIn(false);
     setCurrentPage('home');
   };
